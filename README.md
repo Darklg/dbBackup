@@ -1,9 +1,8 @@
 # dbBackup
 Backup a MySQL database on a shared hosting and keep an history
 
-## Config file
-
-Create a file named backup-config.sh` in the repository.
+## Config
+Create a config file named `backup-config.sh` in the backup repository.
 
 ```#/bin/bash
 MYSQL_HOST='';
