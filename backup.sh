@@ -2,7 +2,7 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.1.0';
+echo '# v 0.1.1';
 echo '# By @Darklg';
 echo '################';
 echo '';
@@ -24,7 +24,7 @@ if [[ ! -f "${CONFIG_FILE}" ]];then
     return 0;
 else
     echo "# Loading user config";
-    /bin/bash "${CONFIG_FILE}";
+    . "${CONFIG_FILE}";
 fi;
 
 ###################################
