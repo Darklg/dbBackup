@@ -5,10 +5,10 @@ Backup a MySQL database on a shared hosting and keep an history
 Create a config file named `backup-config.sh` in the backup repository.
 
 ```#/bin/bash
-MYSQL_HOST='';
-MYSQL_USER='';
-MYSQL_PASS='';
-MYSQL_BASE='';
-BACKUP_FOLDER='/absolute/path/to/backupfolder';
-BACKUP_DAYS=5;
+DBBK_MYSQL_HOST='';
+DBBK_MYSQL_USER='';
+DBBK_MYSQL_PASS='';
+DBBK_MYSQL_BASE='';
+DBBK_FOLDER='/absolute/path/to/backupfolder';
+DBBK_DAYS=5;
 ```
