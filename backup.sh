@@ -2,7 +2,7 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.3.0';
+echo '# v 0.3.1';
 echo '# By @Darklg';
 echo '################';
 echo '';
@@ -84,6 +84,13 @@ DBBK_FILE_GZ="${DBBK_FOLDER}/${DBBK_NAME}.gz";
 echo "# Backup database";
 mysqldump --defaults-file="${DBBK_SCRIPT_PATH}my.cnf" -h "${DBBK_MYSQL_HOST}" "${DBBK_MYSQL_BASE}" > "${DBBK_FILE}";
 
+DBBK_FILE_SIZE="$(wc -c <"${DBBK_FILE}")";
+
+if (( ${DBBK_FILE_SIZE} < 4000 )); then
+    echo "/!\\ The backup file seems really small. You should check it. /!\\";
+fi;
+
+
 echo "# Compress backup";
 gzip "${DBBK_FILE}";
 
@@ -106,6 +113,7 @@ unset DBBK_CONFIG_FILE;
 unset DBBK_DAYS;
 unset DBBK_FILE;
 unset DBBK_FILE_GZ;
+unset DBBK_FILE_SIZE;
 unset DBBK_FOLDER;
 unset DBBK_MYSQL_BASE;
 unset DBBK_MYSQL_HOST;
