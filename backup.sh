@@ -2,7 +2,7 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.4.0';
+echo '# v 0.4.1';
 echo '# By @Darklg';
 echo '################';
 echo '';
@@ -76,7 +76,7 @@ password=${DBBK_MYSQL_PASS}
 ## Test MySQL access
 ###################################
 
-mysql --defaults-file="${DBBK_SCRIPT_PATH}my.cnf" -e exit 2>/dev/null
+mysql --defaults-file="${DBBK_SCRIPT_PATH}my.cnf" --host="${DBBK_MYSQL_HOST}" -e exit 2>/dev/null
 DBBK_MYSQL_STATUS=$(echo $?);
 if [ "${DBBK_MYSQL_STATUS}" -ne 0 ]; then
     echo "# The provided MySQL access are not correct.";
