@@ -2,23 +2,10 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.4.1';
+echo '# v 0.5.0';
 echo '# By @Darklg';
 echo '################';
 echo '';
-
-###################################
-## Check requirements
-###################################
-
-DBBK_REQUIREMENTS="find gzip mysql mysqldump";
-for DBBK_REQ in $DBBK_REQUIREMENTS
-do
-    command -v "$DBBK_REQ" >/dev/null 2>&1 || { echo >&2 "You need \"${DBBK_REQ}\" to continue."; return 1; }
-done;
-
-unset DBBK_REQ;
-unset DBBK_REQUIREMENTS;
 
 ###################################
 ## Basic vars
@@ -58,10 +45,35 @@ fi;
 # Check if config is ok
 if [ -z "${DBBK_DAYS+x}" ] || [ -z "${DBBK_FOLDER+x}" ] || [ -z "${DBBK_MYSQL_USER+x}" ] || [ -z "${DBBK_MYSQL_BASE+x}" ] || [ -z "${DBBK_MYSQL_PASS+x}" ] || [ -z "${DBBK_MYSQL_HOST+x}" ]; then
     echo "# The config file is not valid. Please check the README.";
-    return 1
-fi
+    return 1;
+fi;
 
-# Create a temporary MySQL config file
+# Check for non required settings
+if [ -z "${DBBK_MYSQL_TEST+x}" ]; then
+    DBBK_MYSQL_TEST=1;
+fi;
+
+###################################
+## Check requirements
+###################################
+
+DBBK_REQUIREMENTS="find gzip mysqldump";
+if [ $DBBK_MYSQL_TEST == "1" ];then
+    DBBK_REQUIREMENTS="${DBBK_REQUIREMENTS} mysql";
+fi;
+
+for DBBK_REQ in $DBBK_REQUIREMENTS
+do
+    command -v "$DBBK_REQ" >/dev/null 2>&1 || { echo >&2 "You need \"${DBBK_REQ}\" to continue."; return 1; }
+done;
+
+unset DBBK_REQ;
+unset DBBK_REQUIREMENTS;
+
+###################################
+## Create a temporary MySQL config file
+###################################
+
 echo "
 [mysqldump]
 user=${DBBK_MYSQL_USER}
@@ -76,12 +88,14 @@ password=${DBBK_MYSQL_PASS}
 ## Test MySQL access
 ###################################
 
-mysql --defaults-file="${DBBK_SCRIPT_PATH}my.cnf" --host="${DBBK_MYSQL_HOST}" -e exit 2>/dev/null
-DBBK_MYSQL_STATUS=$(echo $?);
-if [ "${DBBK_MYSQL_STATUS}" -ne 0 ]; then
-    echo "# The provided MySQL access are not correct.";
-    rm "${DBBK_SCRIPT_PATH}my.cnf";
-    return 0;
+if [ $DBBK_MYSQL_TEST == "1" ];then
+    mysql --defaults-file="${DBBK_SCRIPT_PATH}my.cnf" --host="${DBBK_MYSQL_HOST}" -e exit 2>/dev/null
+    DBBK_MYSQL_STATUS=$(echo $?);
+    if [ "${DBBK_MYSQL_STATUS}" -ne 0 ]; then
+        echo "# The provided MySQL access are not correct.";
+        . "${DBBK_SCRIPT_PATH}inc/clean.sh";
+        return 0;
+    fi;
 fi;
 
 ###################################
@@ -90,13 +104,13 @@ fi;
 
 if [ ! -d "${DBBK_FOLDER}" ];then
     echo "# Creating backup folder";
-    rm "${DBBK_SCRIPT_PATH}my.cnf";
+    . "${DBBK_SCRIPT_PATH}inc/clean.sh";
     mkdir "${DBBK_FOLDER}";
 fi;
 
 if [ ! -d "${DBBK_FOLDER}" ];then
     echo "# The backup folder could not be created";
-    rm "${DBBK_SCRIPT_PATH}my.cnf";
+    . "${DBBK_SCRIPT_PATH}inc/clean.sh";
     return 0;
 fi;
 
@@ -136,17 +150,4 @@ echo "# -> ${DBBK_NAME}.gz : $(($(wc -c <"${DBBK_FILE_GZ}")/1024))KB";
 ## Clean up
 ###################################
 
-rm "${DBBK_SCRIPT_PATH}my.cnf";
-unset DBBK_CONFIG_FILE;
-unset DBBK_MYSQL_STATUS;
-unset DBBK_DAYS;
-unset DBBK_FILE;
-unset DBBK_FILE_GZ;
-unset DBBK_FILE_SIZE;
-unset DBBK_FOLDER;
-unset DBBK_MYSQL_BASE;
-unset DBBK_MYSQL_HOST;
-unset DBBK_MYSQL_PASS;
-unset DBBK_MYSQL_USER;
-unset DBBK_NAME;
-unset DBBK_SCRIPT_PATH;
+. "${DBBK_SCRIPT_PATH}inc/clean.sh";
