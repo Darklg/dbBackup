@@ -1,0 +1,9 @@
+#!/bin/bash
+######
+DBBK_MYSQL_HOST='';
+DBBK_MYSQL_USER='';
+DBBK_MYSQL_PASS='';
+DBBK_MYSQL_BASE='';
+DBBK_FOLDER='/absolute/path/to/backupfolder';
+DBBK_DAYS=5;
+######

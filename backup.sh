@@ -2,7 +2,7 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.5.0';
+echo '# v 0.6.0';
 echo '# By @Darklg';
 echo '################';
 echo '';
@@ -19,27 +19,19 @@ DBBK_SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/"
 ###################################
 
 DBBK_CONFIG_FILE="${DBBK_SCRIPT_PATH}/backup-config.sh";
-if [ ! -f "${DBBK_CONFIG_FILE}" ]; then
-    # No config file : load argument if file
-    if [ -f "${1}" ]; then
-        echo "# Loading config file specified in argument.";
-        . "${1}";
-    else
-        echo "# You must have a config file. Please create a file named 'backup-config.sh' with this content :";
-        echo "######";
-        echo "#/bin/bash";
-        echo "DBBK_MYSQL_HOST='';";
-        echo "DBBK_MYSQL_USER='';";
-        echo "DBBK_MYSQL_PASS='';";
-        echo "DBBK_MYSQL_BASE='';";
-        echo "DBBK_FOLDER='/absolute/path/to/backupfolder';";
-        echo "DBBK_DAYS=5;";
-        echo "######";
-        return 0;
-    fi;
+if [ -f "${1}" ]; then
+    # Load argument if specified
+    echo "# Loading config file specified in argument.";
+    . "${1}";
 else
-    echo "# Loading user config";
-    . "${DBBK_CONFIG_FILE}";
+    if [ ! -f "${DBBK_CONFIG_FILE}" ]; then
+        echo "# You must have a config file. Please create a file named 'backup-config.sh' with this content :";
+        cat "${DBBK_SCRIPT_PATH}/backup-example.sh";
+        return 0;
+    else
+        echo "# Loading local config file.";
+        . "${DBBK_CONFIG_FILE}";
+    fi;
 fi;
 
 # Check if config is ok
@@ -122,20 +114,22 @@ DBBK_NAME="backup-${DBBK_MYSQL_BASE}-$(date +"%Y%m%d-%H%M%S").sql";
 DBBK_FILE="${DBBK_FOLDER}/${DBBK_NAME}";
 DBBK_FILE_GZ="${DBBK_FOLDER}/${DBBK_NAME}.gz";
 
-echo "# Backup database";
+echo "# Backing up database";
 mysqldump --defaults-file="${DBBK_SCRIPT_PATH}my.cnf" -h "${DBBK_MYSQL_HOST}" "${DBBK_MYSQL_BASE}" > "${DBBK_FILE}";
 
 DBBK_FILE_SIZE="$(wc -c <"${DBBK_FILE}")";
+echo "# -> ${DBBK_NAME} : $((${DBBK_FILE_SIZE}/1024))KB";
 
 if [ "${DBBK_FILE_SIZE}" -lt 4000 ]; then
     echo "/!\\ The backup file seems really small. You should check it. /!\\";
 fi;
 
-echo "# Compress backup";
+echo "# Compressing backup";
 gzip "${DBBK_FILE}";
+echo "# -> ${DBBK_NAME}.gz : $(($(wc -c <"${DBBK_FILE_GZ}")/1024))KB";
 
 ###################################
-## Good to go
+## Deleting old backups
 ###################################
 
 if [ "$DBBK_DAYS" -gt 0 ]; then
@@ -143,11 +137,9 @@ if [ "$DBBK_DAYS" -gt 0 ]; then
     find "${DBBK_FOLDER}"* -mtime +"${DBBK_DAYS}" -exec rm {} \;
 fi;
 
-echo "# Backup is over";
-echo "# -> ${DBBK_NAME}.gz : $(($(wc -c <"${DBBK_FILE_GZ}")/1024))KB";
-
 ###################################
-## Clean up
+## Clean up & stop
 ###################################
 
 . "${DBBK_SCRIPT_PATH}inc/clean.sh";
+echo "# Backup is over";
