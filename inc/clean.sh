@@ -7,6 +7,7 @@ unset DBBK_FILE;
 unset DBBK_FILE_GZ;
 unset DBBK_FILE_SIZE;
 unset DBBK_FOLDER;
+unset DBBK_MINTIME;
 unset DBBK_MYSQL_BASE;
 unset DBBK_MYSQL_HOST;
 unset DBBK_MYSQL_PASS;

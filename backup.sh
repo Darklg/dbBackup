@@ -2,7 +2,7 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.6.0';
+echo '# v 0.7.0';
 echo '# By @Darklg';
 echo '################';
 echo '';
@@ -44,6 +44,9 @@ fi;
 if [ -z "${DBBK_MYSQL_TEST+x}" ]; then
     DBBK_MYSQL_TEST=1;
 fi;
+if [ -z "${DBBK_MINTIME+z}" ]; then
+    DBBK_MINTIME=0;
+fi;
 
 ###################################
 ## Check requirements
@@ -61,6 +64,17 @@ done;
 
 unset DBBK_REQ;
 unset DBBK_REQUIREMENTS;
+
+###################################
+## Skip if too recent
+###################################
+
+if [ "$DBBK_MINTIME" -gt 0 ]; then
+    if test "`find ${DBBK_FOLDER} -mmin -$(echo $DBBK_MINTIME)`"; then
+        echo "# The last backup has been made less than ${DBBK_MINTIME} minute(s) ago. Skipping backup.";
+        return 1;
+    fi;
+fi;
 
 ###################################
 ## Create a temporary MySQL config file
