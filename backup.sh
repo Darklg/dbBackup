@@ -2,7 +2,7 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.7.0';
+echo '# v 0.7.1';
 echo '# By @Darklg';
 echo '################';
 echo '';
@@ -27,6 +27,7 @@ else
     if [ ! -f "${DBBK_CONFIG_FILE}" ]; then
         echo "# You must have a config file. Please create a file named 'backup-config.sh' with this content :";
         cat "${DBBK_SCRIPT_PATH}/backup-example.sh";
+        echo -e "\007";
         return 0;
     else
         echo "# Loading local config file.";
@@ -70,7 +71,7 @@ unset DBBK_REQUIREMENTS;
 ###################################
 
 if [ "$DBBK_MINTIME" -gt 0 ]; then
-    if test "`find ${DBBK_FOLDER} -mmin -$(echo $DBBK_MINTIME)`"; then
+    if test "$(find ${DBBK_FOLDER} -mmin -$DBBK_MINTIME)"; then
         echo "# The last backup has been made less than ${DBBK_MINTIME} minute(s) ago. Skipping backup.";
         return 1;
     fi;
@@ -100,6 +101,7 @@ if [ $DBBK_MYSQL_TEST == "1" ];then
     if [ "${DBBK_MYSQL_STATUS}" -ne 0 ]; then
         echo "# The provided MySQL access are not correct.";
         . "${DBBK_SCRIPT_PATH}inc/clean.sh";
+        echo -e "\007";
         return 0;
     fi;
 fi;
@@ -117,6 +119,7 @@ fi;
 if [ ! -d "${DBBK_FOLDER}" ];then
     echo "# The backup folder could not be created";
     . "${DBBK_SCRIPT_PATH}inc/clean.sh";
+    echo -e "\007";
     return 0;
 fi;
 
@@ -129,10 +132,17 @@ DBBK_FILE="${DBBK_FOLDER}/${DBBK_NAME}";
 DBBK_FILE_GZ="${DBBK_FOLDER}/${DBBK_NAME}.gz";
 
 echo "# Backing up database";
-mysqldump --defaults-file="${DBBK_SCRIPT_PATH}my.cnf" -h "${DBBK_MYSQL_HOST}" "${DBBK_MYSQL_BASE}" > "${DBBK_FILE}";
-
-DBBK_FILE_SIZE="$(wc -c <"${DBBK_FILE}")";
-echo "# -> ${DBBK_NAME} : $((${DBBK_FILE_SIZE}/1024))KB";
+mysqldump --defaults-file="${DBBK_SCRIPT_PATH}my.cnf" -h "${DBBK_MYSQL_HOST}" "${DBBK_MYSQL_BASE}" --routines > "${DBBK_FILE}";
+if [ "$?" -eq 0 ]
+then
+    DBBK_FILE_SIZE="$(wc -c <"${DBBK_FILE}")";
+    echo "# -> ${DBBK_NAME} : $((DBBK_FILE_SIZE/1024))KB";
+else
+    echo "# mysqldump encountered an error";
+    . "${DBBK_SCRIPT_PATH}inc/clean.sh";
+    echo -e "\007";
+    return 0;
+fi
 
 if [ "${DBBK_FILE_SIZE}" -lt 4000 ]; then
     echo "/!\\ The backup file seems really small. You should check it. /!\\";
@@ -140,6 +150,8 @@ fi;
 
 echo "# Compressing backup";
 gzip "${DBBK_FILE}";
+echo "# Validating compressed backup";
+gzip -t "${DBBK_FILE}";
 echo "# -> ${DBBK_NAME}.gz : $(($(wc -c <"${DBBK_FILE_GZ}")/1024))KB";
 
 ###################################
