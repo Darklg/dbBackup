@@ -2,7 +2,7 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.7.1';
+echo '# v 0.7.2';
 echo '# By @Darklg';
 echo '################';
 echo '';
@@ -12,7 +12,7 @@ echo '';
 ###################################
 
 # Get absolute path to the script
-DBBK_SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/"
+DBBK_SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/";
 
 ###################################
 ## Config
@@ -37,8 +37,9 @@ fi;
 
 # Check if config is ok
 if [ -z "${DBBK_DAYS+x}" ] || [ -z "${DBBK_FOLDER+x}" ] || [ -z "${DBBK_MYSQL_USER+x}" ] || [ -z "${DBBK_MYSQL_BASE+x}" ] || [ -z "${DBBK_MYSQL_PASS+x}" ] || [ -z "${DBBK_MYSQL_HOST+x}" ]; then
-    echo "# The config file is not valid. Please check the README.";
-    return 1;
+    echo "# The config file is not valid because some vars are missing. Please check the README.";
+    echo -e "\007";
+    return 0;
 fi;
 
 # Check for non required settings
@@ -112,7 +113,6 @@ fi;
 
 if [ ! -d "${DBBK_FOLDER}" ];then
     echo "# Creating backup folder";
-    . "${DBBK_SCRIPT_PATH}inc/clean.sh";
     mkdir "${DBBK_FOLDER}";
 fi;
 
