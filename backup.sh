@@ -2,7 +2,7 @@
 
 echo '################';
 echo '# DB Backup';
-echo '# v 0.7.2';
+echo '# v 0.7.3';
 echo '# By @Darklg';
 echo '################';
 echo '';
@@ -36,7 +36,7 @@ else
 fi;
 
 # Check if config is ok
-if [ -z "${DBBK_DAYS+x}" ] || [ -z "${DBBK_FOLDER+x}" ] || [ -z "${DBBK_MYSQL_USER+x}" ] || [ -z "${DBBK_MYSQL_BASE+x}" ] || [ -z "${DBBK_MYSQL_PASS+x}" ] || [ -z "${DBBK_MYSQL_HOST+x}" ]; then
+if [ -z "${DBBK_FOLDER+x}" ] || [ -z "${DBBK_MYSQL_USER+x}" ] || [ -z "${DBBK_MYSQL_BASE+x}" ] || [ -z "${DBBK_MYSQL_PASS+x}" ] || [ -z "${DBBK_MYSQL_HOST+x}" ]; then
     echo "# The config file is not valid because some vars are missing. Please check the README.";
     echo -e "\007";
     return 0;
@@ -48,6 +48,9 @@ if [ -z "${DBBK_MYSQL_TEST+x}" ]; then
 fi;
 if [ -z "${DBBK_MINTIME+z}" ]; then
     DBBK_MINTIME=0;
+fi;
+if [ -z "${DBBK_DAYS+z}" ]; then
+    DBBK_DAYS=0;
 fi;
 
 ###################################
